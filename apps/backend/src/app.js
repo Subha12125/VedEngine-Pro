@@ -4,6 +4,7 @@ import healthCheckRoute from "./routes/health.routes.js";
 import { documentRoutes } from "./routes/document.route.js";
 import { searchLogRoutes } from "./routes/searchLog.route.js";
 import searchRoutes from "./routes/search.route.js";
+import { SearchAnalyticsRoutes } from "./routes/analytics.route.js";
 
 
 // Build the Fastify app
@@ -21,6 +22,8 @@ const buildApp = async()=> {
     await app.register(searchLogRoutes, { prefix: '/api/v1/search-log' });
     // Registering search routes
     await app.register(searchRoutes, { prefix: '/api/v1/search' });
+    // Search analytics routes
+    await app.register(SearchAnalyticsRoutes, { prefix: '/api/v1/analytics' });
     return app;
 }
 
