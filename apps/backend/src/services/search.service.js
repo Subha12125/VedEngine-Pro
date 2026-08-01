@@ -60,6 +60,8 @@ export const searchDocument = async (query, page = 1, limit = 10, userId = null,
         SELECT  
             id,
             title,
+            content,
+            popularity,
             ts_headline(
                 'english',
                 content,
@@ -69,13 +71,13 @@ export const searchDocument = async (query, page = 1, limit = 10, userId = null,
             "createdAt",
             "updatedAt",
             ts_rank(
-                to_tsvector('english', title || ' ' || content),
+                search_vector,
                 plainto_tsquery('english', ${query})
             ) AS rank
         FROM 
             "Document"
         WHERE
-            to_tsvector('english', title || ' ' || content)
+            search_vector
             @@
             plainto_tsquery('english', ${query})
         ORDER BY
@@ -92,7 +94,7 @@ export const searchDocument = async (query, page = 1, limit = 10, userId = null,
         FROM
             "Document"
         WHERE
-            to_tsvector('english', title || ' ' || content)
+            search_vector
             @@
             plainto_tsquery('english', ${query});
         `;
