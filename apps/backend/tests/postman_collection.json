@@ -1,0 +1,401 @@
+{
+	"info": {
+		"_postman_id": "vedengine-upload-tests",
+		"name": "VedEngine - Upload API Tests",
+		"description": "Complete test suite for the VedEngine document upload endpoint.\n\nCovers success cases (TXT, PDF, DOCX) and failure cases (no file, oversized, wrong MIME, spoofed extension).\n\nBase URL: http://localhost:3000",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Success Cases",
+			"item": [
+				{
+					"name": "Upload valid TXT file",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "",
+									"description": "Select a .txt file under 10 MB"
+								},
+								{
+									"key": "title",
+									"value": "Test TXT Document",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "A plain text test upload",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/upload",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "upload"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+									"pm.test('Response has success true', () => {",
+									"    const body = pm.response.json();",
+									"    pm.expect(body.success).to.be.true;",
+									"    pm.expect(body.message).to.eql('File uploaded successfully');",
+									"});",
+									"pm.test('Response contains document data', () => {",
+									"    const body = pm.response.json();",
+									"    pm.expect(body.data).to.have.property('document');",
+									"    pm.expect(body.data).to.have.property('file');",
+									"    pm.expect(body.data.file.mimetype).to.eql('text/plain');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Upload valid PDF file",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "",
+									"description": "Select a .pdf file under 10 MB"
+								},
+								{
+									"key": "title",
+									"value": "Test PDF Document",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "A PDF test upload",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/upload",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "upload"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+									"pm.test('Response has success true', () => {",
+									"    const body = pm.response.json();",
+									"    pm.expect(body.success).to.be.true;",
+									"});",
+									"pm.test('MIME type is application/pdf', () => {",
+									"    const body = pm.response.json();",
+									"    pm.expect(body.data.file.mimetype).to.eql('application/pdf');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Upload valid DOCX file",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "",
+									"description": "Select a .docx file under 10 MB"
+								},
+								{
+									"key": "title",
+									"value": "Test DOCX Document",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "A DOCX test upload",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/upload",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "upload"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+									"pm.test('Response has success true', () => {",
+									"    const body = pm.response.json();",
+									"    pm.expect(body.success).to.be.true;",
+									"});",
+									"pm.test('MIME type is DOCX', () => {",
+									"    const body = pm.response.json();",
+									"    pm.expect(body.data.file.mimetype).to.eql(",
+									"        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'",
+									"    );",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Failure Cases",
+			"item": [
+				{
+					"name": "No file attached",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "title",
+									"value": "Missing File",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/upload",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "upload"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 400', () => pm.response.to.have.status(400));",
+									"pm.test('Error message present', () => {",
+									"    const body = pm.response.json();",
+									"    pm.expect(body.success).to.be.false;",
+									"    pm.expect(body.error).to.be.a('string');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Unsupported file type (JPG)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "",
+									"description": "Select a .jpg or .png file"
+								},
+								{
+									"key": "title",
+									"value": "Wrong Type",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/upload",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "upload"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 415', () => pm.response.to.have.status(415));",
+									"pm.test('Error mentions unsupported type', () => {",
+									"    const body = pm.response.json();",
+									"    pm.expect(body.success).to.be.false;",
+									"    pm.expect(body.error).to.include('Unsupported');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Unsupported file type (EXE)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "",
+									"description": "Select a .exe file"
+								},
+								{
+									"key": "title",
+									"value": "Executable",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/upload",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "upload"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 415', () => pm.response.to.have.status(415));",
+									"pm.test('Error is present', () => {",
+									"    const body = pm.response.json();",
+									"    pm.expect(body.success).to.be.false;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Oversized file (>10 MB)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "",
+									"description": "Select a file LARGER than 10 MB"
+								},
+								{
+									"key": "title",
+									"value": "Too Big",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/upload",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "upload"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 413', () => pm.response.to.have.status(413));",
+									"pm.test('Error mentions size limit', () => {",
+									"    const body = pm.response.json();",
+									"    pm.expect(body.success).to.be.false;",
+									"    pm.expect(body.error).to.include('10 MB');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Spoofed MIME type (EXE renamed to PDF)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "",
+									"description": "Rename a .exe to .pdf and select it here"
+								},
+								{
+									"key": "title",
+									"value": "Spoofed",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/upload",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "upload"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 415', () => pm.response.to.have.status(415));",
+									"pm.test('Detects spoofed content', () => {",
+									"    const body = pm.response.json();",
+									"    pm.expect(body.success).to.be.false;",
+									"    pm.expect(body.error).to.include('spoofed').or.include('does not match');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				}
+			]
+		}
+	]
+}
