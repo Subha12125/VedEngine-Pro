@@ -18,7 +18,10 @@ const buildApp = async()=> {
         logger: true,
     })
     // Registering CORS
-    await app.register(cors);
+    await app.register(cors, {
+        origin: true,
+        credentials: true,
+    });
 
     // Registering JWT
     await app.register(fastifyJwt, {
