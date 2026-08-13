@@ -1,8 +1,6 @@
 import prisma from "../config/prisma.config.js";
 import path from "path";
 import fs from "fs";
-import mammoth from "mammoth";
-import pdfParse from "pdf-parse";
 
 
 /**
@@ -71,27 +69,28 @@ export const uploadService = async (file, title, description) => {
  * @returns - extracted text
  */
 export const extractTextFromDocx = async (filePath) => {
-    try{
-        const result = await mammoth.extractRawText({path: filePath});
+    try {
+        const mammoth = await import("mammoth").then(m => m.default || m).catch(() => null);
+        if (!mammoth) {
+            throw new Error("mammoth package is not installed");
+        }
+        const result = await mammoth.extractRawText({ path: filePath });
         return result.value;
-    }
-    catch(error){
+    } catch (error) {
         throw error;
     }
-}
+};
 
-/**
- * Extract text from pdf file
- * @param filePath - path to the pdf file
- * @returns - extracted text
- */
 export const extractTextFromPDF = async (filePath) => {
-    try{
+    try {
+        const pdfParse = await import("pdf-parse").then(m => m.default || m).catch(() => null);
+        if (!pdfParse) {
+            throw new Error("pdf-parse package is not installed");
+        }
         const dataBuffer = fs.readFileSync(filePath);
         const data = await pdfParse(dataBuffer);
         return data.text;
-    }
-    catch(error){
+    } catch (error) {
         throw error;
     }
-}
+};

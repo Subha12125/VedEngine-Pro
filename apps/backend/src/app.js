@@ -1,12 +1,14 @@
 import fastify from "fastify";
 import cors from "@fastify/cors";
 import multipart from "@fastify/multipart";
+import fastifyJwt from "@fastify/jwt";
 import healthCheckRoute from "./routes/health.routes.js";
 import { documentRoutes } from "./routes/document.route.js";
 import { searchLogRoutes } from "./routes/searchLog.route.js";
 import searchRoutes from "./routes/search.route.js";
 import { SearchAnalyticsRoutes } from "./routes/analytics.route.js";
 import { uploadRoutes } from "./routes/upload.route.js";
+import authRoutes from "./routes/auth.route.js";
 import { MAX_FILE_SIZE } from "./validators/upload.validator.js";
 
 
@@ -17,6 +19,11 @@ const buildApp = async()=> {
     })
     // Registering CORS
     await app.register(cors);
+
+    // Registering JWT
+    await app.register(fastifyJwt, {
+        secret: process.env.JWT_SECRET || "supersecretkey"
+    });
 
     // Registering @fastify/multipart for file uploads
     await app.register(multipart, {
@@ -38,7 +45,10 @@ const buildApp = async()=> {
     await app.register(SearchAnalyticsRoutes, { prefix: '/api/v1/analytics' });
     // Registering upload routes
     await app.register(uploadRoutes, { prefix: '/api/v1' });
+    // Registering auth routes
+    await app.register(authRoutes, { prefix: '/api/v1/auth' });
     return app;
 }
 
 export default buildApp;
+
