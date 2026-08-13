@@ -2,15 +2,16 @@
 
 # 🔍 VedEngine
 
-### AI-Powered Search Engine
+### AI-Vector Powered Web Search Engine
 
-*Delivering the most optimized search results through intelligent query processing*
+*Delivering high-performance, Google-style search with natural language vector matching and a modern Claude Warm Beige UI.*
 
 [![Node.js](https://img.shields.io/badge/Node.js-22+-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
 [![Fastify](https://img.shields.io/badge/Fastify-5.x-000000?style=for-the-badge&logo=fastify&logoColor=white)](https://fastify.dev/)
 [![Prisma](https://img.shields.io/badge/Prisma-7.x-2D3748?style=for-the-badge&logo=prisma&logoColor=white)](https://www.prisma.io/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16+-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-[![pnpm](https://img.shields.io/badge/pnpm-workspace-F69220?style=for-the-badge&logo=pnpm&logoColor=white)](https://pnpm.io/)
+[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 
 ---
 
@@ -19,14 +20,14 @@
 ## 📖 Table of Contents
 
 - [Overview](#-overview)
-- [Architecture](#-architecture)
+- [Key Features](#-key-features)
 - [Tech Stack](#-tech-stack)
+- [Architecture](#-architecture)
 - [Project Structure](#-project-structure)
 - [Getting Started](#-getting-started)
 - [Environment Variables](#-environment-variables)
-- [Database](#-database)
+- [Database & Seeding](#-database--seeding)
 - [API Reference](#-api-reference)
-- [Scripts](#-scripts)
 - [Contributing](#-contributing)
 - [License](#-license)
 
@@ -34,57 +35,24 @@
 
 ## 🌟 Overview
 
-**VedEngine** is an AI-powered search engine designed to deliver highly optimized search results. Built as a modern monorepo, it separates concerns across multiple workspaces — a **backend API**, a **frontend client**, and an **AI service** — enabling each component to scale and evolve independently.
-
-### Key Features
-
-- 🔎 **Smart Document Search** — Search documents by keyword with optimized query handling
-- 📄 **Document Management** — Full CRUD operations for document storage and retrieval
-- 📊 **Search Analytics** — Track recent and trending searches for insights
-- 🏗️ **Monorepo Architecture** — Clean separation via pnpm workspaces
-- ⚡ **High Performance** — Built on Fastify, one of the fastest Node.js frameworks
-- 🛡️ **Type Safety** — Prisma ORM with generated types for reliable database access
+**VedEngine** is a full-stack, AI-powered web search engine designed to index documents, web pages, and general knowledge into a PostgreSQL vector database. It features a frictionless Google-style search interface with domain favicons, direct URL redirection, text snippet highlights, and a warm **Claude-inspired Beige & Terracotta light theme**.
 
 ---
 
-## 🏛️ Architecture
+## ⚡ Key Features
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                      VedEngine                          │
-│                    (pnpm monorepo)                       │
-│                                                         │
-│  ┌──────────────┐  ┌──────────────┐  ┌───────────────┐  │
-│  │   Frontend   │  │   Backend    │  │  AI Service   │  │
-│  │   (apps/)    │  │   (apps/)    │  │ (services/)   │  │
-│  │              │──│              │──│               │  │
-│  │  Client App  │  │  Fastify API │  │  ML Pipeline  │  │
-│  └──────────────┘  └──────┬───────┘  └───────────────┘  │
-│                           │                             │
-│                    ┌──────┴───────┐                      │
-│                    │  PostgreSQL  │                      │
-│                    │  (Supabase)  │                      │
-│                    └──────────────┘                      │
-└─────────────────────────────────────────────────────────┘
-```
-
-### Backend Layered Architecture
-
-The backend follows a clean **3-layer architecture** for separation of concerns:
-
-```
-Request ──▶ Route ──▶ Controller ──▶ Service ──▶ Prisma ──▶ Database
-                         │                         │
-                    Validation &             Business Logic &
-                    HTTP Response            Database Queries
-```
-
-| Layer | Responsibility |
-|-------|---------------|
-| **Routes** | Define HTTP endpoints and map them to controllers |
-| **Controllers** | Handle request/response, input validation, HTTP status codes |
-| **Services** | Business logic and database operations via Prisma |
-| **Config** | Environment variables, database connections, external services |
+- 🌐 **Frictionless Public Search** — Anyone visiting the website can search documents, view auto-suggestions, and access vector search matches without requiring a login.
+- 🎨 **Claude Warm Beige Theme** — Styled with a parchment background (`#faf4ec`), cream cards (`#fcf8f2`), terracotta highlights (`#d97757`), and charcoal typography (`#2d2721`).
+- 🔗 **Google Search-Style Results**:
+  - Live domain favicons powered by Google's Favicon API.
+  - Domain breadcrumbs (e.g. `wikipedia.org › page`).
+  - Clickable title links and direct **"Visit Website"** buttons that open external sites in new browser tabs.
+  - Highlighted search terms rendered safely via `<mark>` badges.
+- 🔐 **Role-Based Access Control (RBAC)**:
+  - **Normal Users (`role: "user"`)**: Search, auto-complete suggestions, and query analytics.
+  - **Admins (`role: "admin"`)**: Upload documents (`+ Upload Document`), delete indexed files, manage `/documents`, and access audit analytics (`/analytics`).
+- 🔎 **Hybrid Search Engine** — PostgreSQL Full-Text Search combined with a substring fallback algorithm (`contains` with `insensitive` mode) ensuring both exact and partial queries (e.g., `clou`, `python`, `ai`) return relevant results.
+- 📦 **General Knowledge Seeder** — Pre-populated with 56+ curated topics across Technology, Science, History, Business, Health, Sports, and Arts.
 
 ---
 
@@ -92,17 +60,37 @@ Request ──▶ Route ──▶ Controller ──▶ Service ──▶ Prisma 
 
 | Category | Technology | Purpose |
 |----------|-----------|---------|
-| **Runtime** | Node.js (ESM) | JavaScript runtime with ES modules |
-| **Framework** | Fastify 5 | High-performance HTTP server |
-| **ORM** | Prisma 7 | Type-safe database client & migrations |
-| **Database** | PostgreSQL | Primary data store (via Supabase) |
-| **Queue** | BullMQ + IORedis | Background job processing |
-| **Auth** | @fastify/jwt | JWT-based authentication |
-| **Validation** | Zod 4 | Runtime schema validation |
-| **File Upload** | Multer | Multipart form data handling |
-| **API Docs** | @fastify/swagger-ui | Interactive API documentation |
-| **Package Manager** | pnpm (workspaces) | Monorepo dependency management |
-| **Dev Tools** | Nodemon | Hot-reload during development |
+| **Frontend** | React 19 + Vite 6 | Fast modern Single Page Application |
+| **Styling** | TailwindCSS v4 | Utility-first Claude Warm Beige styling |
+| **Routing** | React Router DOM v7 | Dynamic client-side routing & RBAC route guards |
+| **Backend API** | Fastify 5 | Ultra-fast Node.js HTTP framework |
+| **Database** | PostgreSQL + Prisma 7 | Relational database & type-safe ORM |
+| **Cache** | Upstash Redis | High-speed response caching |
+| **Scraper & Parser** | Cheerio + Axios | Web page content extraction & link indexing |
+| **Auth** | @fastify/jwt + Bcrypt | JSON Web Token authentication & password hashing |
+| **Package Manager** | pnpm (Workspaces) | Monorepo package management |
+
+---
+
+## 🏛️ Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                       VedEngine                             │
+│                     (pnpm monorepo)                         │
+│                                                             │
+│  ┌──────────────────────┐        ┌──────────────────────┐  │
+│  │   Frontend Client    │        │     Backend API      │  │
+│  │   (apps/frontend)    │        │    (apps/backend)    │  │
+│  │   React 19 + Vite    │───────▶│   Fastify 5 + Prisma │  │
+│  └──────────────────────┘        └──────────┬───────────┘  │
+│                                             │               │
+│                                     ┌───────┴────────┐      │
+│                                     │   PostgreSQL   │      │
+│                                     │   & Redis      │      │
+│                                     └────────────────┘      │
+└─────────────────────────────────────────────────────────────┘
+```
 
 ---
 
@@ -111,38 +99,31 @@ Request ──▶ Route ──▶ Controller ──▶ Service ──▶ Prisma 
 ```
 VedEngine/
 ├── apps/
-│   ├── backend/                    # Backend API server
+│   ├── backend/                      # Fastify API Backend
 │   │   ├── prisma/
-│   │   │   ├── schema.prisma       # Database schema definitions
-│   │   │   └── migrations/         # Database migration files
+│   │   │   ├── schema.prisma         # Database models (User, Document, SearchLog)
 │   │   ├── src/
-│   │   │   ├── config/
-│   │   │   │   ├── env.config.js       # Environment variables
-│   │   │   │   ├── prisma.config.js    # Prisma client instance
-│   │   │   │   └── supabase.config.js  # Supabase connection
-│   │   │   ├── controller/
-│   │   │   │   ├── document.controller.js
-│   │   │   │   ├── healthcheck.controller.js
-│   │   │   │   └── searchLog.controller.js
-│   │   │   ├── routes/
-│   │   │   │   ├── document.route.js
-│   │   │   │   ├── health.routes.js
-│   │   │   │   └── searchLog.route.js
-│   │   │   ├── services/
-│   │   │   │   ├── document.service.js
-│   │   │   │   └── searchLog.service.js
-│   │   │   ├── generated/          # Auto-generated Prisma client
-│   │   │   ├── app.js              # Fastify app builder & route registration
-│   │   │   └── server.js           # Server entry point
+│   │   │   ├── config/               # Prisma, Redis, Environment configs
+│   │   │   ├── controller/           # Search, Document, Auth, Analytics controllers
+│   │   │   ├── routes/               # Fastify API routes
+│   │   │   ├── services/             # Search logic, SQL full-text search, Auth logic
+│   │   │   ├── utils/                # Web scraper (cheerio) & seed data
+│   │   │   └── scripts/              # Seed scripts (seed_general_data.js, create_admin.js)
 │   │   └── package.json
-│   └── frontend/                   # Frontend client (TBD)
-├── services/
-│   └── aiService/                  # AI/ML search service (TBD)
-├── packages/                       # Shared packages
-├── docs/                           # Documentation
-├── infrastructure/                 # Deployment & infra configs
-├── pnpm-workspace.yaml             # Workspace configuration
-└── package.json                    # Root package config
+│   │
+│   └── frontend/                     # React Frontend Client
+│       ├── src/
+│       │   ├── assets/               # Branding assets
+│       │   ├── components/           # Navbar, Searchbar, SearchResult, UploadModal, Loading
+│       │   ├── context/              # AuthContext (JWT session management)
+│       │   ├── pages/                # Dashboard, Documents, Analytics, Login, Register
+│       │   ├── routes/               # AppRoutes & AdminRoute protection
+│       │   ├── services/             # Axios API service
+│       │   ├── index.css             # TailwindCSS v4 Claude Warm Beige theme
+│       │   └── main.jsx              # React app entry
+│       └── package.json
+├── pnpm-workspace.yaml               # Monorepo configuration
+└── package.json                      # Root package config
 ```
 
 ---
@@ -153,7 +134,7 @@ VedEngine/
 
 - **Node.js** ≥ 22.x
 - **pnpm** ≥ 9.x
-- **PostgreSQL** database (or a [Supabase](https://supabase.com/) project)
+- **PostgreSQL** database (Local or Supabase)
 
 ### 1. Clone the Repository
 
@@ -168,215 +149,91 @@ cd VedEngine
 pnpm install
 ```
 
-### 3. Configure Environment
+### 3. Environment Setup
 
-Create a `.env` file inside `apps/backend/`:
+Create `.env` files in both `apps/backend/` and `apps/frontend/`:
 
-```bash
-cp apps/backend/.env.example apps/backend/.env
+**`apps/backend/.env`**:
+```env
+PORT=3000
+NODE_ENV=development
+DATABASE_URL="postgresql://user:password@host:5432/vedengine"
+UPSTASH_REDIS_REST_URL="https://your-redis-url.upstash.io"
+UPSTASH_REDIS_REST_TOKEN="your-upstash-token"
+JWT_SECRET="supersecretjwtkey"
 ```
 
-Fill in the required environment variables (see [Environment Variables](#-environment-variables)).
+**`apps/frontend/.env`**:
+```env
+VITE_API_URL="http://localhost:3000/api/v1"
+```
 
-### 4. Set Up the Database
+### 4. Database Setup & Seeding
 
 ```bash
 cd apps/backend
 
-# Generate Prisma client
+# Generate Prisma Client
 npx prisma generate
 
-# Run migrations
-npx prisma migrate dev
+# Apply Database Schema
+npx prisma db push
+
+# Populate General Knowledge Base (56+ topics)
+node --experimental-strip-types src/scripts/seed_general_data.js
+
+# Create Admin Account (subha)
+node --experimental-strip-types src/scripts/create_admin.js
 ```
 
-### 5. Start the Development Server
+### 5. Start Development Servers
+
+Run backend and frontend simultaneously:
 
 ```bash
+# Start Backend (Port 3000)
 pnpm --filter backend dev
+
+# Start Frontend (Port 5173)
+pnpm --filter frontend dev
 ```
 
-The API will be available at `http://localhost:5000`.
+Visit the app at **`http://localhost:5173`**.
 
 ---
 
-## 🔐 Environment Variables
+## 🔑 Admin Credentials
 
-Create a `.env` file in `apps/backend/` with the following variables:
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `PORT` | Server port number | `5000` |
-| `NODE_ENV` | Environment mode (`development` / `production`) | `development` |
-| `DATABASE_URL` | PostgreSQL connection string | *required* |
-
-```env
-# apps/backend/.env
-PORT=5000
-NODE_ENV=development
-DATABASE_URL="postgresql://user:password@host:5432/vedengine"
-```
-
----
-
-## 🗃️ Database
-
-### Schema
-
-The database is managed with **Prisma ORM** and consists of the following models:
-
-#### Document
-
-| Column | Type | Description |
-|--------|------|-------------|
-| `id` | `String (UUID)` | Primary key, auto-generated |
-| `title` | `String` | Document title |
-| `content` | `String` | Document body content |
-| `createdAt` | `DateTime` | Creation timestamp |
-| `updatedAt` | `DateTime` | Last update timestamp |
-
-#### SearchLog
-
-| Column | Type | Description |
-|--------|------|-------------|
-| `id` | `String (UUID)` | Primary key, auto-generated |
-| `query` | `String` | The search query string |
-| `createdAt` | `DateTime` | When the search was made |
-| `updatedAt` | `DateTime` | Last update timestamp |
-
-### Common Prisma Commands
-
-```bash
-# Generate client after schema changes
-npx prisma generate
-
-# Create and apply a new migration
-npx prisma migrate dev --name <migration_name>
-
-# Open Prisma Studio (visual database browser)
-npx prisma studio
-
-# Reset the database (⚠️ destructive)
-npx prisma migrate reset
-```
+| Account | Email | Password | Role |
+|---|---|---|---|
+| **Admin** | `subha@example.com` | `Subha@12125` | `admin` |
 
 ---
 
 ## 📡 API Reference
 
-**Base URL:** `http://localhost:5000/api/v1`
+**Base URL:** `http://localhost:3000/api/v1`
 
-### Health Check
+### 1. Search Endpoints
+| Method | Endpoint | Description | Query Parameters |
+|--------|----------|-------------|------------------|
+| `GET` | `/search` | Full-text & vector keyword search | `?q=cloud&page=1&limit=10` |
+| `GET` | `/search/suggestions` | Auto-complete suggestions | `?q=javascript` |
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/health` | Server health status |
+### 2. Authentication Endpoints
+| Method | Endpoint | Description | Payload |
+|--------|----------|-------------|---------|
+| `POST` | `/auth/register` | Register a new user | `{ name, email, password }` |
+| `POST` | `/auth/login` | Login user & return JWT | `{ email, password }` |
+| `GET` | `/auth/profile` | Get current user session | Bearer Token |
 
----
-
-### 📄 Documents — `/api/v1`
-
-| Method | Endpoint | Description | Body |
-|--------|----------|-------------|------|
-| `POST` | `/create` | Create a new document | `{ title, content }` |
-| `GET` | `/all` | Get all documents | — |
-| `GET` | `/:id` | Get document by ID | — |
-| `GET` | `/` | Search documents by keyword | `?keyword=...` |
-| `PUT` | `/:id` | Update a document | `{ title, content }` |
-| `DELETE` | `/:id` | Delete a document | — |
-
-#### Example: Create a Document
-
-```bash
-curl -X POST http://localhost:5000/api/v1/create \
-  -H "Content-Type: application/json" \
-  -d '{"title": "Getting Started", "content": "Welcome to VedEngine!"}'
-```
-
-#### Example Response
-
-```json
-{
-  "status": "Created",
-  "data": {
-    "id": "a1b2c3d4-...",
-    "title": "Getting Started",
-    "content": "Welcome to VedEngine!",
-    "createdAt": "2026-06-19T08:00:00.000Z",
-    "updatedAt": "2026-06-19T08:00:00.000Z"
-  },
-  "success": true
-}
-```
-
----
-
-### 🔍 Search Logs — `/api/v1/search-log`
-
-| Method | Endpoint | Description | Body |
-|--------|----------|-------------|------|
-| `POST` | `/` | Log a new search query | `{ query }` |
-| `GET` | `/recent` | Get 10 most recent unique searches | — |
-| `GET` | `/trending` | Get 10 most frequently searched queries | — |
-
-#### Example: Log a Search
-
-```bash
-curl -X POST http://localhost:5000/api/v1/search-log \
-  -H "Content-Type: application/json" \
-  -d '{"query": "artificial intelligence"}'
-```
-
-#### Example: Get Trending Searches
-
-```bash
-curl http://localhost:5000/api/v1/search-log/trending
-```
-
-#### Example Response
-
-```json
-{
-  "status": "Success",
-  "data": [
-    { "query": "machine learning", "_count": { "query": 42 } },
-    { "query": "neural networks", "_count": { "query": 31 } }
-  ],
-  "success": true
-}
-```
-
----
-
-## 📜 Scripts
-
-### Backend (`apps/backend`)
-
-| Script | Command | Description |
-|--------|---------|-------------|
-| **Dev** | `pnpm --filter backend dev` | Start with hot-reload (nodemon) |
-| **Start** | `pnpm --filter backend start` | Start in production mode |
-| **Test** | `pnpm --filter backend test` | Run tests |
-
----
-
-## 🤝 Contributing
-
-1. **Fork** the repository
-2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
-3. **Commit** your changes (`git commit -m 'Add: amazing feature'`)
-4. **Push** to the branch (`git push origin feature/amazing-feature`)
-5. **Open** a Pull Request
-
-### Commit Convention
-
-```
-Add : <description>       # New feature
-Fix : <description>       # Bug fix
-Update : <description>    # Modification to existing feature
-Remove : <description>    # Deletion
-Docs : <description>      # Documentation only
-```
+### 3. Document Management (Admin Only)
+| Method | Endpoint | Description | Payload |
+|--------|----------|-------------|---------|
+| `GET` | `/all` | Get all indexed documents | — |
+| `POST` | `/create` | Create document/link | `{ title, content, url }` |
+| `POST` | `/upload` | Upload PDF/TXT file | `multipart/form-data` |
+| `DELETE`| `/:id` | Delete document by ID | — |
 
 ---
 
@@ -388,6 +245,6 @@ This project is licensed under the **ISC License**.
 
 <div align="center">
 
-**Built with ❤️ by [Subho](https://github.com/Subha12125)**
+**Built with ❤️ by [Subha](https://github.com/Subha12125)**
 
 </div>
