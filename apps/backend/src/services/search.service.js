@@ -21,15 +21,19 @@ export const searchDocument = async (query, page = 1, limit = 10, userId = null,
 
         const cacheKey = `search:${query.trim().toLowerCase()}:page:${page}:limit:${limit}:sort:${sort}`;
 
-        // Checking cache
-        const cachedData = await redis.get(cacheKey);
-        if(cachedData){
-            console.log("✅ Cache hit ✅");
-            // Upstash redis client auto-parses JSON, so cachedData may already be an object
-            if (typeof cachedData === "string") {
-                return JSON.parse(cachedData);
+        // Checking cache — wrapped in try-catch so search still works if Redis is unavailable
+        try {
+            const cachedData = await redis.get(cacheKey);
+            if(cachedData){
+                console.log("✅ Cache hit ✅");
+                // Upstash redis client auto-parses JSON, so cachedData may already be an object
+                if (typeof cachedData === "string") {
+                    return JSON.parse(cachedData);
+                }
+                return cachedData;
             }
-            return cachedData;
+        } catch (redisErr) {
+            console.warn("⚠ Redis cache read failed, querying database directly:", redisErr.message);
         }
         console.log("❌ Cache miss ❌");
 
@@ -56,66 +60,113 @@ export const searchDocument = async (query, page = 1, limit = 10, userId = null,
         // so we use Prisma.sql to inject a trusted literal.
         const orderDirection = sort === "newest" ? Prisma.sql`DESC` : Prisma.sql`ASC`;
 
-        const documents = await prisma.$queryRaw`
-        SELECT  
-            id,
-            title,
-            ts_headline(
-                'english',
-                content,
-                plainto_tsquery('english', ${query}),
-                'StartSel=<mark>, StopSel=</mark>, MaxWords=20, MinWords=3'
-            ) AS snippet,
-            "createdAt",
-            "updatedAt",
-            ts_rank(
-                to_tsvector('english', title || ' ' || content),
+        let documents = [];
+        let total = 0;
+
+        try {
+            documents = await prisma.$queryRaw`
+            SELECT  
+                id,
+                title,
+                description,
+                url,
+                "fileType",
+                "fileName",
+                "fileUrl",
+                ts_headline(
+                    'english',
+                    COALESCE(content, ''),
+                    plainto_tsquery('english', ${query}),
+                    'StartSel=<mark>, StopSel=</mark>, MaxWords=20, MinWords=3'
+                ) AS snippet,
+                "createdAt",
+                "updatedAt",
+                ts_rank(
+                    to_tsvector('english', COALESCE(title, '') || ' ' || COALESCE(content, '')),
+                    plainto_tsquery('english', ${query})
+                ) AS rank
+            FROM 
+                "Document"
+            WHERE
+                to_tsvector('english', COALESCE(title, '') || ' ' || COALESCE(content, ''))
+                @@
                 plainto_tsquery('english', ${query})
-            ) AS rank
-        FROM 
-            "Document"
-        WHERE
-            to_tsvector('english', title || ' ' || content)
-            @@
-            plainto_tsquery('english', ${query})
-        ORDER BY
-            rank ${orderDirection}
-        LIMIT ${limit}
-        OFFSET ${skip};
-        `;
+            ORDER BY
+                rank ${orderDirection}
+            LIMIT ${limit}
+            OFFSET ${skip};
+            `;
 
-        // Getting total number of documents for pagination
-        // without RANK
-        const countResult = await prisma.$queryRaw`
-        SELECT
-            COUNT(*) AS total
-        FROM
-            "Document"
-        WHERE
-            to_tsvector('english', title || ' ' || content)
-            @@
-            plainto_tsquery('english', ${query});
-        `;
+            const countResult = await prisma.$queryRaw`
+            SELECT
+                COUNT(*) AS total
+            FROM
+                "Document"
+            WHERE
+                to_tsvector('english', COALESCE(title, '') || ' ' || COALESCE(content, ''))
+                @@
+                plainto_tsquery('english', ${query});
+            `;
+            total = Number(countResult[0]?.total || 0);
+        } catch (rawErr) {
+            console.warn("⚠ Raw full-text search query failed, using fallback:", rawErr.message);
+        }
 
-        // Converting total count to number
-        const total = Number(countResult[0].total);
-        
-        // Returning documents and meta data
+        // Fallback to substring matching if full-text search yielded no results
+        if (!documents || documents.length === 0) {
+            console.log("ℹ Full-text search returned 0 results. Using substring fallback search...");
+            const whereClause = {
+                OR: [
+                    { title: { contains: query, mode: "insensitive" } },
+                    { description: { contains: query, mode: "insensitive" } },
+                    { content: { contains: query, mode: "insensitive" } },
+                ],
+            };
+
+            const [fallbackDocs, fallbackTotal] = await Promise.all([
+                prisma.document.findMany({
+                    where: whereClause,
+                    skip,
+                    take: limit,
+                    orderBy: { createdAt: sort === "newest" ? "desc" : "asc" },
+                }),
+                prisma.document.count({ where: whereClause }),
+            ]);
+
+            total = fallbackTotal;
+            documents = fallbackDocs.map((doc) => ({
+                id: doc.id,
+                title: doc.title,
+                description: doc.description,
+                url: doc.url,
+                fileType: doc.fileType,
+                fileName: doc.fileName,
+                fileUrl: doc.fileUrl,
+                snippet: doc.description || doc.content?.substring(0, 150) || 'No snippet available',
+                createdAt: doc.createdAt,
+                updatedAt: doc.updatedAt,
+                rank: 1,
+            }));
+        }
+
+        // Returning documents and metadata
         const result = {
             documents,
             page,
             limit,
             total,
-            totalPages: Math.ceil(total/limit),
+            totalPages: Math.ceil(total / limit) || 1,
         };
 
-        // Cache the result for 1 day (86400 seconds)
-        await redis.set(cacheKey, JSON.stringify(result), { ex: 86400 });
+        // Cache the result for 1 day (86400 seconds) — non-blocking if Redis fails
+        try {
+            await redis.set(cacheKey, JSON.stringify(result), { ex: 86400 });
+        } catch (redisErr) {
+            console.warn("⚠ Redis cache write failed:", redisErr.message);
+        }
 
         return result;
-
-    }
-    catch(error){
+    } catch (error) {
         throw error;
     }
 }
@@ -127,19 +178,20 @@ export const searchDocument = async (query, page = 1, limit = 10, userId = null,
 // @returns - success response
 export const searchSuggestion = async (query, limit = 10, userId = null) => {
     try {
-        // Finding documents where title starts with query
+        // Finding documents where title contains query (case-insensitive)
         return await prisma.document.findMany({
             where: {
                 title: {
-                    startsWith : query,
+                    contains : query,
                     mode : "insensitive"
                 }
             },
 
-            // Selecting only id and title
+            // Selecting id, title, and url
             select: {
                 id: true,
                 title: true,
+                url: true,
             },
 
             take: limit,
