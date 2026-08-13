@@ -1,0 +1,223 @@
+{
+	"client": "Thunder Client",
+	"collectionName": "VedEngine - Upload API Tests",
+	"dateExported": "2026-08-05",
+	"version": "1.1",
+	"folders": [
+		{
+			"_id": "folder-success",
+			"name": "Success Cases",
+			"containerId": "",
+			"sortNum": 10000
+		},
+		{
+			"_id": "folder-failure",
+			"name": "Failure Cases",
+			"containerId": "",
+			"sortNum": 20000
+		}
+	],
+	"requests": [
+		{
+			"_id": "tc-upload-txt",
+			"colId": "",
+			"containerId": "folder-success",
+			"name": "Upload valid TXT file",
+			"url": "http://localhost:3000/api/v1/upload",
+			"method": "POST",
+			"sortNum": 10000,
+			"body": {
+				"type": "formdata",
+				"raw": "",
+				"form": [
+					{ "name": "title", "value": "Test TXT Document" },
+					{ "name": "description", "value": "A plain text test upload" }
+				],
+				"files": [
+					{ "name": "file", "value": "" }
+				]
+			},
+			"tests": [
+				{
+					"type": "res-code",
+					"custom": "",
+					"action": "equal",
+					"value": "200"
+				},
+				{
+					"type": "res-body",
+					"custom": "json.success",
+					"action": "equal",
+					"value": "true"
+				}
+			]
+		},
+		{
+			"_id": "tc-upload-pdf",
+			"colId": "",
+			"containerId": "folder-success",
+			"name": "Upload valid PDF file",
+			"url": "http://localhost:3000/api/v1/upload",
+			"method": "POST",
+			"sortNum": 20000,
+			"body": {
+				"type": "formdata",
+				"raw": "",
+				"form": [
+					{ "name": "title", "value": "Test PDF Document" },
+					{ "name": "description", "value": "A PDF test upload" }
+				],
+				"files": [
+					{ "name": "file", "value": "" }
+				]
+			},
+			"tests": [
+				{
+					"type": "res-code",
+					"custom": "",
+					"action": "equal",
+					"value": "200"
+				}
+			]
+		},
+		{
+			"_id": "tc-upload-docx",
+			"colId": "",
+			"containerId": "folder-success",
+			"name": "Upload valid DOCX file",
+			"url": "http://localhost:3000/api/v1/upload",
+			"method": "POST",
+			"sortNum": 30000,
+			"body": {
+				"type": "formdata",
+				"raw": "",
+				"form": [
+					{ "name": "title", "value": "Test DOCX Document" },
+					{ "name": "description", "value": "A DOCX test upload" }
+				],
+				"files": [
+					{ "name": "file", "value": "" }
+				]
+			},
+			"tests": [
+				{
+					"type": "res-code",
+					"custom": "",
+					"action": "equal",
+					"value": "200"
+				}
+			]
+		},
+		{
+			"_id": "tc-no-file",
+			"colId": "",
+			"containerId": "folder-failure",
+			"name": "No file attached",
+			"url": "http://localhost:3000/api/v1/upload",
+			"method": "POST",
+			"sortNum": 40000,
+			"body": {
+				"type": "formdata",
+				"raw": "",
+				"form": [
+					{ "name": "title", "value": "Missing File" }
+				]
+			},
+			"tests": [
+				{
+					"type": "res-code",
+					"custom": "",
+					"action": "equal",
+					"value": "400"
+				},
+				{
+					"type": "res-body",
+					"custom": "json.success",
+					"action": "equal",
+					"value": "false"
+				}
+			]
+		},
+		{
+			"_id": "tc-wrong-type",
+			"colId": "",
+			"containerId": "folder-failure",
+			"name": "Unsupported file type (JPG)",
+			"url": "http://localhost:3000/api/v1/upload",
+			"method": "POST",
+			"sortNum": 50000,
+			"body": {
+				"type": "formdata",
+				"raw": "",
+				"form": [
+					{ "name": "title", "value": "Wrong Type" }
+				],
+				"files": [
+					{ "name": "file", "value": "" }
+				]
+			},
+			"tests": [
+				{
+					"type": "res-code",
+					"custom": "",
+					"action": "equal",
+					"value": "415"
+				}
+			]
+		},
+		{
+			"_id": "tc-oversized",
+			"colId": "",
+			"containerId": "folder-failure",
+			"name": "Oversized file (>10 MB)",
+			"url": "http://localhost:3000/api/v1/upload",
+			"method": "POST",
+			"sortNum": 60000,
+			"body": {
+				"type": "formdata",
+				"raw": "",
+				"form": [
+					{ "name": "title", "value": "Too Big" }
+				],
+				"files": [
+					{ "name": "file", "value": "" }
+				]
+			},
+			"tests": [
+				{
+					"type": "res-code",
+					"custom": "",
+					"action": "equal",
+					"value": "413"
+				}
+			]
+		},
+		{
+			"_id": "tc-spoofed",
+			"colId": "",
+			"containerId": "folder-failure",
+			"name": "Spoofed MIME (EXE renamed to PDF)",
+			"url": "http://localhost:3000/api/v1/upload",
+			"method": "POST",
+			"sortNum": 70000,
+			"body": {
+				"type": "formdata",
+				"raw": "",
+				"form": [
+					{ "name": "title", "value": "Spoofed" }
+				],
+				"files": [
+					{ "name": "file", "value": "" }
+				]
+			},
+			"tests": [
+				{
+					"type": "res-code",
+					"custom": "",
+					"action": "equal",
+					"value": "415"
+				}
+			]
+		}
+	]
+}
