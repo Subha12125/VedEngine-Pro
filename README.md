@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🔍 VedEngine
+# VedEngine
 
 ### AI & Vector-Powered Full-Stack Search Engine
 
