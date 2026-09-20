@@ -1,12 +1,43 @@
 {
-  "name": "vedenginee",
+  "name": "vedengine",
   "version": "1.0.0",
-  "description": "It is an AI powered search Enginee, which provides most optimized search result",
+  "description": "AI & Vector-Powered Full-Stack Search Engine - PostgreSQL full-text search, vector fallback indexing, automated web scraping, Upstash Redis caching, and a Claude Warm Beige UI",
+  "private": true,
+  "author": "Subha <https://github.com/Subha12125>",
   "license": "ISC",
-  "author": "Subho",
-  "type": "commonjs",
-  "main": "index.js",
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "services/*",
+    "packages/*"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "install:all": "pnpm install",
+    "dev": "pnpm --filter backend dev & pnpm --filter frontend dev",
+    "dev:backend": "pnpm --filter backend dev",
+    "dev:frontend": "pnpm --filter frontend dev",
+    "build": "pnpm --filter frontend build",
+    "build:all": "pnpm -r build",
+    "test": "pnpm --filter backend test",
+    "test:all": "pnpm -r test",
+    "lint": "pnpm --filter frontend lint",
+    "lint:all": "pnpm -r lint",
+    "db:generate": "pnpm --filter backend prisma generate",
+    "db:push": "pnpm --filter backend prisma db push",
+    "db:migrate": "pnpm --filter backend prisma migrate dev",
+    "db:seed": "pnpm --filter backend seed:general",
+    "db:seed:expanded": "pnpm --filter backend exec node --experimental-strip-types src/scripts/seed_general_data_expanded.js",
+    "db:seed:social": "pnpm --filter backend exec node --experimental-strip-types src/scripts/seed_social_media.js",
+    "db:admin": "pnpm --filter backend exec node --experimental-strip-types src/scripts/create_admin.js",
+    "clean": "pnpm -r exec rm -rf node_modules dist build .turbo && rm -rf node_modules",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md,css,html,yaml,yml}\""
+  },
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@9.0.0",
+  "devDependencies": {
+    "prettier": "^3.3.3"
   }
 }
