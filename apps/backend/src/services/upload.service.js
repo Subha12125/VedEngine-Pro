@@ -1,6 +1,7 @@
 import prisma from "../config/prisma.config.js";
 import path from "path";
 import fs from "fs";
+import { invalidateSearchCache } from "./cache.service.js";
 
 
 /**
@@ -55,6 +56,9 @@ export const uploadService = async (file, title, description) => {
                 fileUrl: file.filePath,
             },
         });
+
+        // Invalidate search cache so newly uploaded document is instantly searchable
+        await invalidateSearchCache();
 
         return document;
     }
