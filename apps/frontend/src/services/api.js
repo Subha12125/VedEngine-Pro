@@ -88,6 +88,7 @@ export const searchAPI = {
 export const analyticsAPI = {
   getSearchAnalytics: () => api.get('/analytics/search'),
   getSearchLogs: () => api.get('/search-log'),
+  getRecentSearches: () => api.get('/search-log/recent'),
   exportSearchLogsCSV: () => api.get('/analytics/export', { responseType: 'blob' }),
 };
 
