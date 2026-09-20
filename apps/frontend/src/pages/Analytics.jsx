@@ -9,6 +9,7 @@ export default function Analytics() {
   const [analyticsData, setAnalyticsData] = useState(null);
   const [searchLogs, setSearchLogs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isExporting, setIsExporting] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -42,6 +43,27 @@ export default function Analytics() {
     }
   };
 
+  const handleExportCSV = async () => {
+    try {
+      setIsExporting(true);
+      const res = await analyticsAPI.exportSearchLogsCSV();
+      const blob = new Blob([res.data], { type: 'text/csv;charset=utf-8;' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `search_logs_audit_${Date.now()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Failed to export CSV logs:', err);
+      setError('Failed to download CSV audit logs.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   if (loading) {
     return <Loading message="Loading search analytics metrics..." />;
   }
@@ -58,15 +80,28 @@ export default function Analytics() {
           </p>
         </div>
 
-        <button
-          onClick={fetchAnalytics}
-          className="px-5 py-2.5 bg-white hover:bg-[#f4ebd9] text-[#2d2721] font-bold text-sm rounded-xl border border-[#ebdcc9] transition-all flex items-center justify-center gap-2 cursor-pointer shrink-0 shadow-xs"
-        >
-          <svg className="w-4 h-4 text-[#d97757]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-          <span>Refresh Metrics</span>
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleExportCSV}
+            disabled={isExporting}
+            className="px-5 py-2.5 bg-[#d97757] hover:bg-[#c46445] text-white font-bold text-sm rounded-xl shadow-md shadow-[#d97757]/20 transition-all flex items-center justify-center gap-2 cursor-pointer shrink-0 disabled:opacity-50"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            <span>{isExporting ? 'Exporting...' : 'Export CSV Audit Log'}</span>
+          </button>
+
+          <button
+            onClick={fetchAnalytics}
+            className="px-5 py-2.5 bg-white hover:bg-[#f4ebd9] text-[#2d2721] font-bold text-sm rounded-xl border border-[#ebdcc9] transition-all flex items-center justify-center gap-2 cursor-pointer shrink-0 shadow-xs"
+          >
+            <svg className="w-4 h-4 text-[#d97757]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            <span>Refresh Metrics</span>
+          </button>
+        </div>
       </div>
 
       {error && (

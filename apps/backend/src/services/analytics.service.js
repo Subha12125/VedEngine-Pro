@@ -122,3 +122,23 @@ export const getSearchAnalytics = async() => {
         throw error;
     }
 }
+
+export const exportSearchLogsCSV = async () => {
+    try {
+        const logs = await prisma.searchLog.findMany({
+            orderBy: { createdAt: "desc" },
+            take: 1000,
+        });
+
+        const headers = ["ID", "Query", "Created At"];
+        const rows = logs.map((log) => {
+            const escapedQuery = `"${(log.query || "").replace(/"/g, '""')}"`;
+            return `"${log.id}",${escapedQuery},"${log.createdAt ? new Date(log.createdAt).toISOString() : ""}"`;
+        });
+
+        return [headers.join(","), ...rows].join("\n");
+    } catch (error) {
+        console.error("Error in exportSearchLogsCSV", error);
+        throw error;
+    }
+};
