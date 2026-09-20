@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { searchAPI } from '../services/api';
+import { searchAPI, analyticsAPI } from '../services/api';
 
 /**
  * Searchbar Component - Claude Warm Beige Theme
@@ -7,9 +7,28 @@ import { searchAPI } from '../services/api';
 export default function Searchbar({ onSearch, initialQuery = '' }) {
   const [query, setQuery] = useState(initialQuery);
   const [suggestions, setSuggestions] = useState([]);
+  const [recentSearches, setRecentSearches] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [showRecent, setShowRecent] = useState(false);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const containerRef = useRef(null);
+
+  useEffect(() => {
+    fetchRecentSearches();
+  }, []);
+
+  const fetchRecentSearches = async () => {
+    try {
+      const res = await analyticsAPI.getRecentSearches();
+      const list = res.data?.data || res.data?.searches || res.data || [];
+      const formatted = Array.isArray(list)
+        ? list.map(item => (typeof item === 'string' ? item : item.query)).filter(Boolean)
+        : [];
+      setRecentSearches(formatted);
+    } catch (e) {
+      console.warn('Failed to load recent searches:', e);
+    }
+  };
 
   useEffect(() => {
     if (!query.trim() || query.length < 2) {
@@ -17,6 +36,8 @@ export default function Searchbar({ onSearch, initialQuery = '' }) {
       setShowSuggestions(false);
       return;
     }
+
+    setShowRecent(false);
 
     const timer = setTimeout(async () => {
       try {
@@ -39,16 +60,29 @@ export default function Searchbar({ onSearch, initialQuery = '' }) {
     const handleClickOutside = (e) => {
       if (containerRef.current && !containerRef.current.contains(e.target)) {
         setShowSuggestions(false);
+        setShowRecent(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const handleFocus = () => {
+    if (query.trim().length >= 2) {
+      setShowSuggestions(true);
+      setShowRecent(false);
+    } else {
+      setShowRecent(true);
+      setShowSuggestions(false);
+      fetchRecentSearches();
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (query.trim()) {
       setShowSuggestions(false);
+      setShowRecent(false);
       onSearch(query.trim());
     }
   };
@@ -56,6 +90,7 @@ export default function Searchbar({ onSearch, initialQuery = '' }) {
   const handleSelectSuggestion = (suggestionText) => {
     setQuery(suggestionText);
     setShowSuggestions(false);
+    setShowRecent(false);
     onSearch(suggestionText);
   };
 
@@ -63,6 +98,7 @@ export default function Searchbar({ onSearch, initialQuery = '' }) {
     setQuery('');
     setSuggestions([]);
     setShowSuggestions(false);
+    setShowRecent(true);
   };
 
   return (
@@ -79,7 +115,7 @@ export default function Searchbar({ onSearch, initialQuery = '' }) {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          onFocus={() => query.length >= 2 && setShowSuggestions(true)}
+          onFocus={handleFocus}
           placeholder="Ask VedEngine any question or search indexed documents..."
           className="w-full pl-12 pr-28 py-4 bg-white border border-[#ebdcc9] focus:border-[#d97757] focus:ring-4 focus:ring-[#d97757]/15 rounded-2xl text-[#2d2721] placeholder-[#a89887] outline-none transition-all shadow-md shadow-amber-900/5 text-base"
         />
@@ -108,8 +144,34 @@ export default function Searchbar({ onSearch, initialQuery = '' }) {
 
       </form>
 
+      {/* Recent Searches Popover */}
+      {showRecent && !query.trim() && recentSearches.length > 0 && (
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-[#ebdcc9] rounded-2xl shadow-xl overflow-hidden z-50 animate-fadeIn">
+          <div className="px-5 py-2.5 bg-[#fcf8f2] border-b border-[#ebdcc9] text-xs font-bold uppercase tracking-wider text-[#8c7b6c] flex items-center justify-between">
+            <span>Recent Searches</span>
+            <span className="text-[10px] text-[#a89887] font-semibold">History</span>
+          </div>
+          <ul className="divide-y divide-[#ebdcc9]/60">
+            {recentSearches.slice(0, 5).map((item, idx) => (
+              <li key={idx}>
+                <button
+                  type="button"
+                  onClick={() => handleSelectSuggestion(item)}
+                  className="w-full px-5 py-3 text-left text-sm text-[#2d2721] hover:bg-[#fcf8f2] flex items-center gap-3 transition-colors cursor-pointer"
+                >
+                  <svg className="w-4 h-4 text-[#8c7b6c] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="truncate font-medium">{item}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {/* Auto-suggestions Popover */}
-      {showSuggestions && (suggestions.length > 0 || loadingSuggestions) && (
+      {showSuggestions && query.trim().length >= 2 && (suggestions.length > 0 || loadingSuggestions) && (
         <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-[#ebdcc9] rounded-2xl shadow-xl overflow-hidden z-50">
           {loadingSuggestions ? (
             <div className="p-4 text-xs text-[#786b5e] flex items-center gap-2">

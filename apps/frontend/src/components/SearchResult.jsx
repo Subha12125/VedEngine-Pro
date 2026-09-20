@@ -12,7 +12,7 @@ import React from 'react';
  * @param {object} props
  * @param {object} props.result - Individual search result record returned by the backend RAG API
  */
-export default function SearchResult({ result }) {
+export default function SearchResult({ result, onPreview }) {
   // If no result object is passed, render nothing
   if (!result) return null;
 
@@ -149,18 +149,33 @@ export default function SearchResult({ result }) {
           )}
         </div>
 
-        {/* Action Button: Opens target website in new browser tab */}
-        <a
-          href={targetUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="px-3.5 py-1.5 bg-[#d97757] hover:bg-[#c46445] text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm shadow-[#d97757]/20 group/btn"
-        >
-          <span>Visit Website</span>
-          <svg className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-          </svg>
-        </a>
+        <div className="flex items-center gap-2">
+          {/* Quick Preview Button */}
+          <button
+            type="button"
+            onClick={() => onPreview && onPreview(result)}
+            className="px-3.5 py-1.5 bg-[#fcf8f2] hover:bg-[#f4ebd9] text-[#2d2721] border border-[#ebdcc9] hover:border-[#d97757] rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+          >
+            <svg className="w-3.5 h-3.5 text-[#d97757]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+            <span>Quick Preview</span>
+          </button>
+
+          {/* Action Button: Opens target website in new browser tab */}
+          <a
+            href={targetUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-3.5 py-1.5 bg-[#d97757] hover:bg-[#c46445] text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm shadow-[#d97757]/20 group/btn"
+          >
+            <span>Visit Website</span>
+            <svg className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </a>
+        </div>
       </div>
 
     </div>
