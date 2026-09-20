@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Searchbar from '../components/Searchbar';
 import SearchResult from '../components/SearchResult';
 import UploadModal from '../components/UploadModal';
+import DocumentPreviewModal from '../components/DocumentPreviewModal';
 import Loading from '../components/Loading';
 import { searchAPI, documentAPI, analyticsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -29,6 +30,7 @@ export default function Dashboard() {
   const [loadingInitial, setLoadingInitial] = useState(true);
 
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [selectedPreviewDoc, setSelectedPreviewDoc] = useState(null);
 
   // Filter States
   const [activeFileType, setActiveFileType] = useState('all');
@@ -260,7 +262,11 @@ export default function Dashboard() {
             {searchResults.length > 0 ? (
               <div className="space-y-4">
                 {searchResults.map((item, idx) => (
-                  <SearchResult key={item.id || item._id || idx} result={item} />
+                  <SearchResult
+                    key={item.id || item._id || idx}
+                    result={item}
+                    onPreview={(doc) => setSelectedPreviewDoc(doc)}
+                  />
                 ))}
               </div>
             ) : (
@@ -318,6 +324,13 @@ export default function Dashboard() {
           onSuccess={handleUploadSuccess}
         />
       )}
+
+      {/* Document Quick Preview Modal */}
+      <DocumentPreviewModal
+        isOpen={!!selectedPreviewDoc}
+        onClose={() => setSelectedPreviewDoc(null)}
+        result={selectedPreviewDoc}
+      />
 
     </div>
   );
