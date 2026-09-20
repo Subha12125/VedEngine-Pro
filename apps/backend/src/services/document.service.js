@@ -1,9 +1,11 @@
 import prisma from "../config/prisma.config.js";
+import { invalidateSearchCache } from "./cache.service.js";
 
 //create Document
 export const createDocument = async (data) => {
     try {
         const document = await prisma.document.create({ data });
+        await invalidateSearchCache();
         return document;
     } catch (error) {
         console.log(error);
@@ -37,6 +39,7 @@ export const findDocumentByID = async (id) => {
 export const updateDocument = async (id, data) => {
     try {
         const updatedDocument = await prisma.document.update({ where: { id }, data });
+        await invalidateSearchCache();
         return updatedDocument;
     } catch (error) {
         throw error;
@@ -47,6 +50,7 @@ export const updateDocument = async (id, data) => {
 export const deleteDocument = async (id) => {
     try {
         const deletedDocument = await prisma.document.delete({ where: { id } });
+        await invalidateSearchCache();
         return deletedDocument;
     } catch (error) {
         throw error;

@@ -66,9 +66,17 @@ export const uploadAPI = {
 
 // 4. AI Search Services
 export const searchAPI = {
-  query: (searchTerm, page = 1, limit = 10) =>
+  query: (searchTerm, page = 1, limit = 10, fileType = 'all', sort = 'newest', from = null, to = null) =>
     api.get('/search', {
-      params: { q: searchTerm, page, limit },
+      params: {
+        q: searchTerm,
+        page,
+        limit,
+        fileType,
+        sort,
+        ...(from ? { from } : {}),
+        ...(to ? { to } : {}),
+      },
     }),
   getSuggestions: (searchTerm) =>
     api.get('/search/suggestions', {
