@@ -9,17 +9,14 @@ import { Prisma } from "../generated/prisma/client.ts";
 // @param userId - user id
 // @param sort - sort order (newest or oldest)
 // @returns - success response
-export const searchDocument = async (query, page = 1, limit = 10, userId = null, sort = "newest") => {
+export const searchDocument = async (query, page = 1, limit = 10, userId = null, sort = "newest", from = null, to = null, fileType = "all") => {
     try{
         const skip = (page - 1)*limit;
 
         /**
-         * Key format: search:<query>:page:<page>:limit:<limit>:sort:<sort>
+         * Key format: search:<query>:page:<page>:limit:<limit>:sort:<sort>:fileType:<fileType>:from:<from>:to:<to>
         */
-        // To create unique key for each search.
-        // Why ? : Because each search will have different query, page, limit and sort.
-
-        const cacheKey = `search:${query.trim().toLowerCase()}:page:${page}:limit:${limit}:sort:${sort}`;
+        const cacheKey = `search:${query.trim().toLowerCase()}:page:${page}:limit:${limit}:sort:${sort}:fileType:${fileType}:from:${from || "none"}:to:${to || "none"}`;
 
         // Checking cache — wrapped in try-catch so search still works if Redis is unavailable
         try {
@@ -37,28 +34,28 @@ export const searchDocument = async (query, page = 1, limit = 10, userId = null,
         }
         console.log("❌ Cache miss ❌");
 
-        /** 
-         * ts_rank - Calculates the ranking of documents based on the query.
-         * plainto_tsquery - Converts a query string to a tsquery value.
-         * @@ - performs the tsquery match.
-         * to_tsvector - Converts a text to a tsvector value.
-         * ts_headline() - Generates a highlighted version of the document, 
-         * replacing search terms with HTML tags (by default `<b>` and `</b>`).
-         * 
-         * Parameters:
-         * 1. 'english' - The dictionary to use for tokenization and stemming.
-         * 2. content - The text to search within.
-         * 3. plainto_tsquery('english', ${query}) - The query to search for.
-         * 4. 'StartGroup=<b> StopGroup=</b> MaxWords=20 MinWords=3 RankWords=10'
-         *    - StartGroup=<b>, StopGroup=</b>: These define the tags to wrap around the matched terms.
-         *    - MaxWords=20: The maximum number of words to include in the snippet.
-         *    - MinWords=3: The minimum number of words to include in the snippet.
-         *    - RankWords=10: The number of top-ranked words to prioritize in the snippet.
-         */
-
-        // Build ORDER BY direction safely — SQL keywords cannot be parameterized,
-        // so we use Prisma.sql to inject a trusted literal.
+        // Build ORDER BY direction safely
         const orderDirection = sort === "newest" ? Prisma.sql`DESC` : Prisma.sql`ASC`;
+
+        // Build dynamic SQL filter conditions for fileType and date range
+        let extraSql = Prisma.sql``;
+
+        if (fileType === "pdf") {
+            extraSql = Prisma.sql`${extraSql} AND (LOWER("fileType") LIKE '%pdf%' OR LOWER("fileName") LIKE '%.pdf')`;
+        } else if (fileType === "docx") {
+            extraSql = Prisma.sql`${extraSql} AND (LOWER("fileType") LIKE '%docx%' OR LOWER("fileName") LIKE '%.docx')`;
+        } else if (fileType === "txt") {
+            extraSql = Prisma.sql`${extraSql} AND (LOWER("fileType") LIKE '%text%' OR LOWER("fileType") LIKE '%plain%' OR LOWER("fileName") LIKE '%.txt')`;
+        } else if (fileType === "web") {
+            extraSql = Prisma.sql`${extraSql} AND ("url" IS NOT NULL AND "fileType" IS NULL)`;
+        }
+
+        if (from) {
+            extraSql = Prisma.sql`${extraSql} AND "createdAt" >= ${new Date(from)}`;
+        }
+        if (to) {
+            extraSql = Prisma.sql`${extraSql} AND "createdAt" <= ${new Date(to)}`;
+        }
 
         let documents = [];
         let total = 0;
@@ -91,6 +88,7 @@ export const searchDocument = async (query, page = 1, limit = 10, userId = null,
                 to_tsvector('english', COALESCE(title, '') || ' ' || COALESCE(content, ''))
                 @@
                 plainto_tsquery('english', ${query})
+                ${extraSql}
             ORDER BY
                 rank ${orderDirection}
             LIMIT ${limit}
@@ -105,7 +103,8 @@ export const searchDocument = async (query, page = 1, limit = 10, userId = null,
             WHERE
                 to_tsvector('english', COALESCE(title, '') || ' ' || COALESCE(content, ''))
                 @@
-                plainto_tsquery('english', ${query});
+                plainto_tsquery('english', ${query})
+                ${extraSql};
             `;
             total = Number(countResult[0]?.total || 0);
         } catch (rawErr) {
@@ -115,13 +114,34 @@ export const searchDocument = async (query, page = 1, limit = 10, userId = null,
         // Fallback to substring matching if full-text search yielded no results
         if (!documents || documents.length === 0) {
             console.log("ℹ Full-text search returned 0 results. Using substring fallback search...");
-            const whereClause = {
-                OR: [
-                    { title: { contains: query, mode: "insensitive" } },
-                    { description: { contains: query, mode: "insensitive" } },
-                    { content: { contains: query, mode: "insensitive" } },
-                ],
-            };
+            const whereConditions = [
+                {
+                    OR: [
+                        { title: { contains: query, mode: "insensitive" } },
+                        { description: { contains: query, mode: "insensitive" } },
+                        { content: { contains: query, mode: "insensitive" } },
+                    ],
+                }
+            ];
+
+            if (fileType === "pdf") {
+                whereConditions.push({ OR: [{ fileType: { contains: "pdf", mode: "insensitive" } }, { fileName: { endsWith: ".pdf", mode: "insensitive" } }] });
+            } else if (fileType === "docx") {
+                whereConditions.push({ OR: [{ fileType: { contains: "docx", mode: "insensitive" } }, { fileName: { endsWith: ".docx", mode: "insensitive" } }] });
+            } else if (fileType === "txt") {
+                whereConditions.push({ OR: [{ fileType: { contains: "plain", mode: "insensitive" } }, { fileType: { contains: "text", mode: "insensitive" } }, { fileName: { endsWith: ".txt", mode: "insensitive" } }] });
+            } else if (fileType === "web") {
+                whereConditions.push({ url: { not: null }, fileType: null });
+            }
+
+            if (from) {
+                whereConditions.push({ createdAt: { gte: new Date(from) } });
+            }
+            if (to) {
+                whereConditions.push({ createdAt: { lte: new Date(to) } });
+            }
+
+            const whereClause = { AND: whereConditions };
 
             const [fallbackDocs, fallbackTotal] = await Promise.all([
                 prisma.document.findMany({

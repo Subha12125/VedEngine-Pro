@@ -30,6 +30,7 @@ export const searchDocumentController = async(request, reply) => {
             limit=10,
             userId = null,
             sort="newest",
+            fileType="all",
             from = null,
             to = null
         } = request.query;
@@ -60,7 +61,8 @@ export const searchDocumentController = async(request, reply) => {
             null, 
             sort,
             from,
-            to
+            to,
+            fileType
         );
         
         const endTime = Date.now();

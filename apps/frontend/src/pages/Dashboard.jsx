@@ -30,37 +30,23 @@ export default function Dashboard() {
 
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
+  // Filter States
+  const [activeFileType, setActiveFileType] = useState('all');
+  const [activeDatePreset, setActiveDatePreset] = useState('anytime');
+  const [activeSort, setActiveSort] = useState('newest');
+
   useEffect(() => {
     fetchDashboardOverview();
   }, []);
 
-  const fetchDashboardOverview = async () => {
-    try {
-      setLoadingInitial(true);
-      
-      const docsRes = await documentAPI.getAllDocuments();
-      const docsList = docsRes.data?.documents || docsRes.data || [];
-      setDocuments(Array.isArray(docsList) ? docsList : []);
-
-      try {
-        const analyticsRes = await analyticsAPI.getSearchAnalytics();
-        const analyticsData = analyticsRes.data?.analytics || analyticsRes.data || {};
-        setStats({
-          totalDocs: docsList.length,
-          totalQueries: analyticsData.totalQueries || 128,
-          avgLatency: analyticsData.avgLatency || '32ms',
-        });
-      } catch (analyticsErr) {
-        setStats((prev) => ({ ...prev, totalDocs: docsList.length }));
-      }
-    } catch (err) {
-      console.error('Failed to load dashboard overview:', err);
-    } finally {
-      setLoadingInitial(false);
-    }
+  const getFromDate = (preset) => {
+    if (preset === '24h') return new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    if (preset === 'week') return new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    if (preset === 'month') return new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    return null;
   };
 
-  const handleSearch = async (queryText) => {
+  const handleSearch = async (queryText, selectedFileType = activeFileType, selectedDatePreset = activeDatePreset, selectedSort = activeSort) => {
     if (!queryText.trim()) return;
 
     try {
@@ -69,7 +55,9 @@ export default function Dashboard() {
       setCurrentQuery(queryText);
       setHasSearched(true);
 
-      const res = await searchAPI.query(queryText);
+      const fromDate = getFromDate(selectedDatePreset);
+
+      const res = await searchAPI.query(queryText, 1, 10, selectedFileType, selectedSort, fromDate, null);
       const resultsList = res.data?.data || res.data?.results || res.data?.documents || (Array.isArray(res.data) ? res.data : []);
       
       setSearchResults(Array.isArray(resultsList) ? resultsList : []);
@@ -79,6 +67,27 @@ export default function Dashboard() {
       setSearchResults([]);
     } finally {
       setIsSearching(false);
+    }
+  };
+
+  const handleFileTypeChange = (newType) => {
+    setActiveFileType(newType);
+    if (currentQuery) {
+      handleSearch(currentQuery, newType, activeDatePreset, activeSort);
+    }
+  };
+
+  const handleDatePresetChange = (newPreset) => {
+    setActiveDatePreset(newPreset);
+    if (currentQuery) {
+      handleSearch(currentQuery, activeFileType, newPreset, activeSort);
+    }
+  };
+
+  const handleSortChange = (newSort) => {
+    setActiveSort(newSort);
+    if (currentQuery) {
+      handleSearch(currentQuery, activeFileType, activeDatePreset, newSort);
     }
   };
 
@@ -167,7 +176,63 @@ export default function Dashboard() {
           </p>
         </div>
 
-        <Searchbar onSearch={handleSearch} initialQuery={currentQuery} />
+        <Searchbar onSearch={(q) => handleSearch(q, activeFileType, activeDatePreset, activeSort)} initialQuery={currentQuery} />
+
+        {/* Interactive Filter Pills & Dropdowns */}
+        <div className="bg-white/80 backdrop-blur border border-[#ebdcc9] rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-sm">
+          {/* Format Filter Pills */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-bold text-[#8c7b6c] uppercase tracking-wider mr-1">Format:</span>
+            {[
+              { id: 'all', label: 'All Formats' },
+              { id: 'pdf', label: 'PDF' },
+              { id: 'docx', label: 'DOCX' },
+              { id: 'txt', label: 'TXT' },
+              { id: 'web', label: 'Web Pages' },
+            ].map((fmt) => (
+              <button
+                key={fmt.id}
+                onClick={() => handleFileTypeChange(fmt.id)}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeFileType === fmt.id
+                    ? 'bg-[#d97757] text-white shadow-sm shadow-[#d97757]/20'
+                    : 'bg-[#fcf8f2] border border-[#ebdcc9] text-[#786b5e] hover:border-[#d97757]/50 hover:text-[#2d2721]'
+                }`}
+              >
+                {fmt.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Date & Sort Selectors */}
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs font-bold text-[#8c7b6c] uppercase tracking-wider">Date:</span>
+              <select
+                value={activeDatePreset}
+                onChange={(e) => handleDatePresetChange(e.target.value)}
+                className="bg-[#fcf8f2] border border-[#ebdcc9] rounded-xl px-3 py-1.5 text-xs font-bold text-[#2d2721] focus:outline-none focus:border-[#d97757] cursor-pointer"
+              >
+                <option value="anytime">Anytime</option>
+                <option value="24h">Past 24 Hours</option>
+                <option value="week">Past Week</option>
+                <option value="month">Past Month</option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs font-bold text-[#8c7b6c] uppercase tracking-wider">Sort:</span>
+              <select
+                value={activeSort}
+                onChange={(e) => handleSortChange(e.target.value)}
+                className="bg-[#fcf8f2] border border-[#ebdcc9] rounded-xl px-3 py-1.5 text-xs font-bold text-[#2d2721] focus:outline-none focus:border-[#d97757] cursor-pointer"
+              >
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+              </select>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* Search Error Alert */}
