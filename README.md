@@ -6,14 +6,14 @@
 
 *An enterprise-grade, high-performance web search engine featuring PostgreSQL full-text search, vector fallback indexing, automated web scraping, Upstash Redis caching, and a Claude Warm Beige user interface.*
 
-[![Node.js](https://img.shields.io/badge/Node.js-22+-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
-[![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
-[![Fastify](https://img.shields.io/badge/Fastify-5.x-000000?style=for-the-badge&logo=fastify&logoColor=white)](https://fastify.dev/)
-[![Prisma](https://img.shields.io/badge/Prisma-7.x-2D3748?style=for-the-badge&logo=prisma&logoColor=white)](https://www.prisma.io/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16+-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-[![Upstash Redis](https://img.shields.io/badge/Upstash_Redis-v1.38-FF4438?style=for-the-badge&logo=redis&logoColor=white)](https://upstash.com/)
-[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
-[![Vitest](https://img.shields.io/badge/Vitest-3.x-6E9F18?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev/)
+[![Node.js](https://img.shields.io/badge/Node.js-22+-339933?style=for-the-badge\&logo=node.js\&logoColor=white)](https://nodejs.org/)
+[![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge\&logo=react\&logoColor=black)](https://react.dev/)
+[![Fastify](https://img.shields.io/badge/Fastify-5.x-000000?style=for-the-badge\&logo=fastify\&logoColor=white)](https://fastify.dev/)
+[![Prisma](https://img.shields.io/badge/Prisma-7.x-2D3748?style=for-the-badge\&logo=prisma\&logoColor=white)](https://www.prisma.io/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16+-4169E1?style=for-the-badge\&logo=postgresql\&logoColor=white)](https://www.postgresql.org/)
+[![Upstash Redis](https://img.shields.io/badge/Upstash_Redis-v1.38-FF4438?style=for-the-badge\&logo=redis\&logoColor=white)](https://upstash.com/)
+[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v4-06B6D4?style=for-the-badge\&logo=tailwindcss\&logoColor=white)](https://tailwindcss.com/)
+[![Vitest](https://img.shields.io/badge/Vitest-3.x-6E9F18?style=for-the-badge\&logo=vitest\&logoColor=white)](https://vitest.dev/)
 
 ---
 
@@ -26,6 +26,7 @@
 ```json
 {
   "project_name": "VedEngine",
+  "repository_name": "VedEngine-Pro",
   "repository_type": "pnpm workspace monorepo",
   "primary_languages": ["JavaScript (ESNext Modules)", "Python (aiService draft)", "SQL (PostgreSQL)"],
   "architecture_pattern": "Decoupled Client-Server Monorepo with RESTful API Services",
@@ -66,20 +67,20 @@
 
 ## 📖 Table of Contents
 
-- [Overview](#-overview)
-- [Key Features](#-key-features)
-- [Tech Stack](#-tech-stack)
-- [System Architecture](#-system-architecture)
-- [Project Directory Map](#-project-directory-map)
-- [Getting Started & Installation](#-getting-started--installation)
-- [Environment Setup](#-environment-setup)
-- [Database Setup & Seeding](#-database-setup--seeding)
-- [Role-Based Access Control (RBAC)](#-role-based-access-control-rbac)
-- [API Reference](#-api-reference)
-- [Database Schema & Data Models](#-database-schema--data-models)
-- [Design System & UI Theme](#-design-system--ui-theme)
-- [Development & Testing](#-development--testing)
-- [License](#-license)
+* [Overview](#-overview)
+* [Key Features](#-key-features)
+* [Tech Stack](#-tech-stack)
+* [System Architecture](#-system-architecture)
+* [Project Directory Map](#-project-directory-map)
+* [Getting Started & Installation](#-getting-started--installation)
+* [Environment Setup](#-environment-setup)
+* [Database Setup & Seeding](#-database-setup--seeding)
+* [Role-Based Access Control (RBAC)](#-role-based-access-control-rbac)
+* [API Reference](#-api-reference)
+* [Database Schema & Data Models](#-database-schema--data-models)
+* [Design System & UI Theme](#-design-system--ui-theme)
+* [Development & Testing](#-development--testing)
+* [License](#-license)
 
 ---
 
@@ -94,50 +95,55 @@ The user interface is modeled after Google-style minimalist search paired with a
 ## ⚡ Key Features
 
 ### 1. 🔍 High-Performance Hybrid Search Engine
-- **PostgreSQL Full-Text Search**: Tokenized indexing using `to_tsvector('english', ...)` and stemmed query evaluation with `plainto_tsquery('english', ...)`.
-- **Dynamic Term Highlighting**: Utilizes PostgreSQL `ts_headline` to automatically wrap matched search query terms inside safe HTML `<mark>` badges.
-- **Substring Matching Fallback**: Gracefully falls back to case-insensitive substring search (`contains`, `mode: "insensitive"`) if full-text index returns zero results, ensuring partial terms (e.g. `clou`, `pyth`) return matching documents.
-- **Upstash Redis Cache**: Instant response caching with TTL eviction (24h default) for high-frequency queries to reduce database load.
+
+* **PostgreSQL Full-Text Search**: Tokenized indexing using `to_tsvector('english', ...)` and stemmed query evaluation with `plainto_tsquery('english', ...)`.
+* **Dynamic Term Highlighting**: Utilizes PostgreSQL `ts_headline` to automatically wrap matched search query terms inside safe HTML `<mark>` badges.
+* **Substring Matching Fallback**: Gracefully falls back to case-insensitive substring search (`contains`, `mode: "insensitive"`) if full-text index returns zero results, ensuring partial terms (e.g. `clou`, `pyth`) return matching documents.
+* **Upstash Redis Cache**: Instant response caching with TTL eviction (24h default) for high-frequency queries to reduce database load.
 
 ### 2. 🌐 Google-Style Search Result Cards
-- **Domain Favicon Integration**: Live high-resolution domain favicons powered by Google's Favicon API.
-- **Breadcrumb Navigation**: Visual URL hierarchy representation (`domain.com › section › subpath`).
-- **Direct Website Redirection**: One-click **"Visit Website"** action buttons opening external links safely in new browser tabs (`target="_blank" rel="noopener noreferrer"`).
-- **Auto-Suggestions**: Debounced auto-complete suggestion menu rendering matching indexed page titles as users type.
+
+* **Domain Favicon Integration**: Live high-resolution domain favicons powered by Google's Favicon API.
+* **Breadcrumb Navigation**: Visual URL hierarchy representation (`domain.com › section › subpath`).
+* **Direct Website Redirection**: One-click **"Visit Website"** action buttons opening external links safely in new browser tabs (`target="_blank" rel="noopener noreferrer"`).
+* **Auto-Suggestions**: Debounced auto-complete suggestion menu rendering matching indexed page titles as users type.
 
 ### 3. 🔐 Role-Based Access Control (RBAC)
-- **Public Visitors & Normal Users (`role: "user"`)**: Access to instant public search, auto-suggestions, pagination, and sorting filter controls.
-- **Administrators (`role: "admin"`)**: Exclusive privileges to upload TXT/PDF/DOCX documents (`+ Upload Document` modal), trigger document creation, manage indexed documents (`/documents`), and audit search query trends (`/analytics`).
+
+* **Public Visitors & Normal Users (`role: "user"`)**: Access to instant public search, auto-suggestions, pagination, and sorting filter controls.
+* **Administrators (`role: "admin"`)**: Exclusive privileges to upload TXT/PDF/DOCX documents (`+ Upload Document` modal), trigger document creation, manage indexed documents (`/documents`), and audit search query trends (`/analytics`).
 
 ### 4. 📁 Document Management & Upload Pipeline
-- **Multi-Format Ingestion**: Supports `.txt`, `.pdf`, and `.docx` file uploads via `@fastify/multipart` with a hard 10 MB stream size limit.
-- **Cheerio Web Scraper**: Automatic link extraction, title normalization, and text parsing for indexing web documents.
+
+* **Multi-Format Ingestion**: Supports `.txt`, `.pdf`, and `.docx` file uploads via `@fastify/multipart` with a hard 10 MB stream size limit.
+* **Cheerio Web Scraper**: Automatic link extraction, title normalization, and text parsing for indexing web documents.
 
 ### 5. 📊 Real-Time Analytics & Audit Tracking
-- **Search Query Logging**: Automatically records every query string in the `SearchLog` database model.
-- **Analytics Dashboard**: Aggregates top search terms, total search operations, system metrics, and index counts.
+
+* **Search Query Logging**: Automatically records every query string in the `SearchLog` database model.
+* **Analytics Dashboard**: Aggregates top search terms, total search operations, system metrics, and index counts.
 
 ---
 
 ## 🧰 Tech Stack
 
-| Category | Technology | Version | Purpose |
-|----------|-----------|---------|---------|
-| **Monorepo Manager** | `pnpm` | `≥9.x` | Monorepo package management & workspace linking |
-| **Frontend Framework** | React | `19.2` | Single Page Application UI engine |
-| **Build Tool & Dev Server** | Vite | `8.0` | Next-gen lightning-fast dev server & bundler |
-| **Routing** | React Router DOM | `7.1` | Client-side dynamic routing & RBAC guards |
-| **Styling** | TailwindCSS | `4.3` | Utility-first styling with Claude Warm Beige theme |
-| **State Management** | Zustand & React Context | `5.0` | Global state and authentication session handling |
-| **HTTP Client** | Axios | `1.18` | Asynchronous REST API requests |
-| **Backend Framework** | Fastify | `5.8` | Ultra-fast Node.js HTTP web framework |
-| **Database ORM** | Prisma | `7.8` | Type-safe PostgreSQL client & schema management |
-| **Database Engine** | PostgreSQL | `16+` | Relational data store & native full-text vector engine |
-| **Caching Layer** | Upstash Redis | `1.38` | Serverless REST-based Redis cache |
-| **Auth & Encryption** | `@fastify/jwt` + `Bcrypt` | `10.1 / 6.0` | JWT token generation & password security |
-| **File Parsing & Scraping** | Cheerio | `1.2` | HTML parsing, text extraction, & scraper utility |
-| **Validation Engine** | Zod | `4.4` | Request payload & query parameter runtime validation |
-| **Unit Testing** | Vitest | `3.2` | Fast unit & integration test runner |
+| Category                    | Technology                | Version      | Purpose                                                |
+| --------------------------- | ------------------------- | ------------ | ------------------------------------------------------ |
+| **Monorepo Manager**        | `pnpm`                    | `≥9.x`       | Monorepo package management & workspace linking        |
+| **Frontend Framework**      | React                     | `19.2`       | Single Page Application UI engine                      |
+| **Build Tool & Dev Server** | Vite                      | `8.0`        | Next-gen lightning-fast dev server & bundler           |
+| **Routing**                 | React Router DOM          | `7.1`        | Client-side dynamic routing & RBAC guards              |
+| **Styling**                 | TailwindCSS               | `4.3`        | Utility-first styling with Claude Warm Beige theme     |
+| **State Management**        | Zustand & React Context   | `5.0`        | Global state and authentication session handling       |
+| **HTTP Client**             | Axios                     | `1.18`       | Asynchronous REST API requests                         |
+| **Backend Framework**       | Fastify                   | `5.8`        | Ultra-fast Node.js HTTP web framework                  |
+| **Database ORM**            | Prisma                    | `7.8`        | Type-safe PostgreSQL client & schema management        |
+| **Database Engine**         | PostgreSQL                | `16+`        | Relational data store & native full-text vector engine |
+| **Caching Layer**           | Upstash Redis             | `1.38`       | Serverless REST-based Redis cache                      |
+| **Auth & Encryption**       | `@fastify/jwt` + `Bcrypt` | `10.1 / 6.0` | JWT token generation & password security               |
+| **File Parsing & Scraping** | Cheerio                   | `1.2`        | HTML parsing, text extraction, & scraper utility       |
+| **Validation Engine**       | Zod                       | `4.4`        | Request payload & query parameter runtime validation   |
+| **Unit Testing**            | Vitest                    | `3.2`        | Fast unit & integration test runner                    |
 
 ---
 
@@ -190,8 +196,8 @@ flowchart TB
 
 ## 📁 Project Directory Map
 
-```
-VedEngine/
+```text
+VedEngine-Pro/
 ├── apps/
 │   ├── backend/                           # Fastify 5 Node.js API Server
 │   │   ├── prisma/
@@ -260,7 +266,7 @@ VedEngine/
 │       │   │   ├── Dashboard.jsx          # Public Search Engine Main Page
 │       │   │   ├── Documents.jsx          # Admin Document Management Portal
 │       │   │   ├── Login.jsx              # Admin & User Login Screen
-│       │   │   └── Register.jsx           # Account Registration Screen
+│       │   │   └── Register.jsx            # Account Registration Screen
 │       │   ├── routes/                    # Navigation & Protected Routes
 │       │   │   └── AppRoutes.jsx          # React Router v7 layout & route guards
 │       │   ├── services/                  # Axios HTTP client configuration
@@ -285,18 +291,19 @@ VedEngine/
 ### Prerequisites
 
 Ensure you have the following software installed on your local environment:
-- **Node.js**: `v22.0.0` or higher
-- **pnpm**: `v9.0.0` or higher
-- **PostgreSQL Database**: `v16.0` or higher (Local installation, Supabase, or Neon)
-- **Redis Cache**: Upstash Redis REST credentials (or standard local Redis server)
+
+* **Node.js**: `v22.0.0` or higher
+* **pnpm**: `v9.0.0` or higher
+* **PostgreSQL Database**: `v16.0` or higher (Local installation, Supabase, or Neon)
+* **Redis Cache**: Upstash Redis REST credentials (or standard local Redis server)
 
 ---
 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/Subha12125/VedEngine.git
-cd VedEngine
+git clone https://github.com/Subha12125/VedEngine-Pro.git
+cd VedEngine-Pro
 ```
 
 ---
@@ -389,21 +396,21 @@ node --experimental-strip-types src/scripts/create_admin.js
 
 VedEngine enforces strict role separation between general search visitors and administrators:
 
-| Permission / Action | Public Visitor | Registered User (`role: "user"`) | Administrator (`role: "admin"`) |
-|---------------------|:--------------:|:-------------------------------:|:------------------------------:|
-| Perform Search Queries | ✅ Yes | ✅ Yes | ✅ Yes |
-| Auto-Complete Suggestions | ✅ Yes | ✅ Yes | ✅ Yes |
-| View Domain Favicons & Snippets | ✅ Yes | ✅ Yes | ✅ Yes |
-| Filter & Sort Search Results | ✅ Yes | ✅ Yes | ✅ Yes |
-| Upload Files (PDF/TXT/DOCX) | ❌ No | ❌ No | ✅ Yes |
-| Create Web Documents via URL | ❌ No | ❌ No | ✅ Yes |
-| Access Document Management (`/documents`) | ❌ No | ❌ No | ✅ Yes |
-| Delete Indexed Documents | ❌ No | ❌ No | ✅ Yes |
-| View Search Analytics (`/analytics`) | ❌ No | ❌ No | ✅ Yes |
+| Permission / Action                       | Public Visitor | Registered User (`role: "user"`) | Administrator (`role: "admin"`) |
+| ----------------------------------------- | :------------: | :------------------------------: | :-----------------------------: |
+| Perform Search Queries                    |      ✅ Yes     |               ✅ Yes              |              ✅ Yes              |
+| Auto-Complete Suggestions                 |      ✅ Yes     |               ✅ Yes              |              ✅ Yes              |
+| View Domain Favicons & Snippets           |      ✅ Yes     |               ✅ Yes              |              ✅ Yes              |
+| Filter & Sort Search Results              |      ✅ Yes     |               ✅ Yes              |              ✅ Yes              |
+| Upload Files (PDF/TXT/DOCX)               |      ❌ No      |               ❌ No               |              ✅ Yes              |
+| Create Web Documents via URL              |      ❌ No      |               ❌ No               |              ✅ Yes              |
+| Access Document Management (`/documents`) |      ❌ No      |               ❌ No               |              ✅ Yes              |
+| Delete Indexed Documents                  |      ❌ No      |               ❌ No               |              ✅ Yes              |
+| View Search Analytics (`/analytics`)      |      ❌ No      |               ❌ No               |              ✅ Yes              |
 
 ### Default Admin Credentials
 
-```
+```text
 Email:    subha@example.com
 Password: Subha@12125
 Role:     admin
@@ -436,9 +443,12 @@ Base API Route: `http://localhost:3000/api/v1`
 ### 1. Health Endpoint
 
 #### `GET /health`
+
 Returns system status and database readiness.
-- **Auth Required**: None
-- **Response `200 OK`**:
+
+* **Auth Required**: None
+* **Response `200 OK`**:
+
 ```json
 {
   "status": "ok",
@@ -452,14 +462,20 @@ Returns system status and database readiness.
 ### 2. Search Endpoints
 
 #### `GET /search`
+
 Performs PostgreSQL full-text search with vector ranking, term highlighting, pagination, and fallback matching.
-- **Auth Required**: None
-- **Query Parameters**:
-  - `q` (string, required): Search query term (e.g. `javascript`)
-  - `page` (number, optional, default: `1`): Page number
-  - `limit` (number, optional, default: `10`): Results per page
-  - `sort` (string, optional, default: `"newest"`): `"newest"` or `"oldest"`
-- **Response `200 OK`**:
+
+* **Auth Required**: None
+
+* **Query Parameters**:
+
+  * `q` (string, required): Search query term (e.g. `javascript`)
+  * `page` (number, optional, default: `1`): Page number
+  * `limit` (number, optional, default: `10`): Results per page
+  * `sort` (string, optional, default: `"newest"`): `"newest"` or `"oldest"`
+
+* **Response `200 OK`**:
+
 ```json
 {
   "documents": [
@@ -484,12 +500,20 @@ Performs PostgreSQL full-text search with vector ranking, term highlighting, pag
 }
 ```
 
+---
+
 #### `GET /search/suggestions`
+
 Provides fast auto-complete suggestions based on query substrings.
-- **Auth Required**: None
-- **Query Parameters**:
-  - `q` (string, required): Query prefix
-- **Response `200 OK`**:
+
+* **Auth Required**: None
+
+* **Query Parameters**:
+
+  * `q` (string, required): Query prefix
+
+* **Response `200 OK`**:
+
 ```json
 [
   {
@@ -505,9 +529,12 @@ Provides fast auto-complete suggestions based on query substrings.
 ### 3. Authentication Endpoints
 
 #### `POST /auth/register`
+
 Registers a new user account.
-- **Auth Required**: None
-- **Body (`application/json`)**:
+
+* **Auth Required**: None
+* **Body (`application/json`)**:
+
 ```json
 {
   "name": "Jane Doe",
@@ -515,7 +542,9 @@ Registers a new user account.
   "password": "Password123!"
 }
 ```
-- **Response `201 Created`**:
+
+* **Response `201 Created`**:
+
 ```json
 {
   "message": "User registered successfully",
@@ -528,17 +557,24 @@ Registers a new user account.
 }
 ```
 
+---
+
 #### `POST /auth/login`
+
 Authenticates user and returns JWT bearer token.
-- **Auth Required**: None
-- **Body (`application/json`)**:
+
+* **Auth Required**: None
+* **Body (`application/json`)**:
+
 ```json
 {
   "email": "jane@example.com",
   "password": "Password123!"
 }
 ```
-- **Response `200 OK`**:
+
+* **Response `200 OK`**:
+
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -551,10 +587,16 @@ Authenticates user and returns JWT bearer token.
 }
 ```
 
+---
+
 #### `GET /auth/profile`
+
 Retrieves currently authenticated user's session profile.
-- **Auth Required**: Bearer JWT (`Authorization: Bearer <token>`)
-- **Response `200 OK`**:
+
+* **Auth Required**: Bearer JWT (`Authorization: Bearer <token>`)
+
+* **Response `200 OK`**:
+
 ```json
 {
   "user": {
@@ -572,14 +614,19 @@ Retrieves currently authenticated user's session profile.
 ### 4. Document Management Endpoints (Admin Only)
 
 #### `GET /all`
+
 Retrieves all indexed documents in the database.
-- **Auth Required**: None (or Admin session for detailed management)
-- **Response `200 OK`**: Array of document objects.
+
+* **Auth Required**: None (or Admin session for detailed management)
+* **Response `200 OK`**: Array of document objects.
 
 #### `POST /create`
+
 Creates a new document manually or via web scraper URL link.
-- **Auth Required**: Admin JWT Token
-- **Body (`application/json`)**:
+
+* **Auth Required**: Admin JWT Token
+* **Body (`application/json`)**:
+
 ```json
 {
   "title": "React Documentation",
@@ -590,34 +637,58 @@ Creates a new document manually or via web scraper URL link.
 ```
 
 #### `POST /upload`
-Uploads a document file (.txt, .pdf, .docx) for parsing and indexation.
-- **Auth Required**: Admin JWT Token
-- **Content-Type**: `multipart/form-data`
-- **Fields**:
-  - `file`: File binary (Max 10 MB)
-  - `title`: (Optional) Document title
-  - `description`: (Optional) Description text
+
+Uploads a document file (`.txt`, `.pdf`, `.docx`) for parsing and indexation.
+
+* **Auth Required**: Admin JWT Token
+* **Content-Type**: `multipart/form-data`
+* **Fields**:
+
+  * `file`: File binary (Max 10 MB)
+  * `title`: Optional document title
+  * `description`: Optional description text
 
 #### `DELETE /:id`
+
 Deletes an indexed document by its unique UUID.
-- **Auth Required**: Admin JWT Token
-- **Response `200 OK`**: `{ "message": "Document deleted successfully" }`
+
+* **Auth Required**: Admin JWT Token
+* **Response `200 OK`**:
+
+```json
+{
+  "message": "Document deleted successfully"
+}
+```
 
 ---
 
 ### 5. Analytics Endpoints
 
 #### `GET /analytics/search`
+
 Retrieves top search queries, request volume, and aggregate search statistics.
-- **Auth Required**: Admin JWT Token
-- **Response `200 OK`**:
+
+* **Auth Required**: Admin JWT Token
+
+* **Response `200 OK`**:
+
 ```json
 {
   "totalSearches": 1420,
   "topQueries": [
-    { "query": "javascript", "count": 210 },
-    { "query": "python", "count": 185 },
-    { "query": "react", "count": 140 }
+    {
+      "query": "javascript",
+      "count": 210
+    },
+    {
+      "query": "python",
+      "count": 185
+    },
+    {
+      "query": "react",
+      "count": 140
+    }
   ]
 }
 ```
@@ -626,47 +697,54 @@ Retrieves top search queries, request volume, and aggregate search statistics.
 
 ## 🗃️ Database Schema & Data Models
 
-Prisma Schema Location: `apps/backend/prisma/schema.prisma`
+Prisma Schema Location:
+
+```text
+apps/backend/prisma/schema.prisma
+```
 
 ### 1. `User` Model
+
 Stores authenticated users and administrative credentials.
 
-| Field | Type | Attributes | Description |
-|-------|------|------------|-------------|
-| `id` | `String` | `@id @default(uuid())` | Unique user identifier |
-| `name` | `String` | — | User's full name |
-| `email` | `String` | `@unique` | Unique login email address |
-| `password` | `String` | — | Bcrypt hashed password |
-| `role` | `String` | `@default("user")` | User authority (`"user"` or `"admin"`) |
-| `createdAt` | `DateTime` | `@default(now())` | Account creation timestamp |
-| `updatedAt` | `DateTime` | `@updatedAt` | Account modification timestamp |
+| Field       | Type       | Attributes             | Description                            |
+| ----------- | ---------- | ---------------------- | -------------------------------------- |
+| `id`        | `String`   | `@id @default(uuid())` | Unique user identifier                 |
+| `name`      | `String`   | —                      | User's full name                       |
+| `email`     | `String`   | `@unique`              | Unique login email address             |
+| `password`  | `String`   | —                      | Bcrypt hashed password                 |
+| `role`      | `String`   | `@default("user")`     | User authority (`"user"` or `"admin"`) |
+| `createdAt` | `DateTime` | `@default(now())`      | Account creation timestamp             |
+| `updatedAt` | `DateTime` | `@updatedAt`           | Account modification timestamp         |
 
 ### 2. `Document` Model
+
 Stores indexed web pages, uploaded files, and seeded knowledge items.
 
-| Field | Type | Attributes | Description |
-|-------|------|------------|-------------|
-| `id` | `String` | `@id @default(uuid())` | Unique document identifier |
-| `title` | `String` | — | Title of document or web page |
-| `content` | `String` | — | Raw body text for full-text search indexing |
-| `description` | `String?` | Optional | Summary preview of content |
-| `fileName` | `String?` | Optional | Original uploaded file name |
-| `fileType` | `String?` | Optional | MIME type (`application/pdf`, `text/plain`) |
-| `fileSize` | `Int?` | Optional | File size in bytes |
-| `fileUrl` | `String?` | Optional | Storage location link |
-| `url` | `String?` | Optional | Canonical web page URL |
-| `createdAt` | `DateTime` | `@default(now())` | Creation timestamp |
-| `updatedAt` | `DateTime` | `@updatedAt` | Modification timestamp |
+| Field         | Type       | Attributes             | Description                                 |
+| ------------- | ---------- | ---------------------- | ------------------------------------------- |
+| `id`          | `String`   | `@id @default(uuid())` | Unique document identifier                  |
+| `title`       | `String`   | —                      | Title of document or web page               |
+| `content`     | `String`   | —                      | Raw body text for full-text search indexing |
+| `description` | `String?`  | Optional               | Summary preview of content                  |
+| `fileName`    | `String?`  | Optional               | Original uploaded file name                 |
+| `fileType`    | `String?`  | Optional               | MIME type (`application/pdf`, `text/plain`) |
+| `fileSize`    | `Int?`     | Optional               | File size in bytes                          |
+| `fileUrl`     | `String?`  | Optional               | Storage location link                       |
+| `url`         | `String?`  | Optional               | Canonical web page URL                      |
+| `createdAt`   | `DateTime` | `@default(now())`      | Creation timestamp                          |
+| `updatedAt`   | `DateTime` | `@updatedAt`           | Modification timestamp                      |
 
 ### 3. `SearchLog` Model
+
 Audits query execution history for analytics aggregation.
 
-| Field | Type | Attributes | Description |
-|-------|------|------------|-------------|
-| `id` | `String` | `@id @default(uuid())` | Unique log entry identifier |
-| `query` | `String` | — | Raw search query string |
-| `createdAt` | `DateTime` | `@default(now())` | Timestamp of query execution |
-| `updatedAt` | `DateTime` | `@updatedAt` | Modification timestamp |
+| Field       | Type       | Attributes             | Description                  |
+| ----------- | ---------- | ---------------------- | ---------------------------- |
+| `id`        | `String`   | `@id @default(uuid())` | Unique log entry identifier  |
+| `query`     | `String`   | —                      | Raw search query string      |
+| `createdAt` | `DateTime` | `@default(now())`      | Timestamp of query execution |
+| `updatedAt` | `DateTime` | `@updatedAt`           | Modification timestamp       |
 
 ---
 
@@ -684,9 +762,10 @@ VedEngine features a custom **Claude-Inspired Warm Beige** aesthetic configured 
 ```
 
 ### Key UI Features
-- **Responsive Layout**: Designed for seamless rendering across desktop, tablet, and mobile displays.
-- **Glassmorphism Nav**: Floating frosted glass header with translucent background blur.
-- **Interactive Micro-Animations**: Smooth hover transitions, active search focus glow, and animated modal transitions powered by `framer-motion`.
+
+* **Responsive Layout**: Designed for seamless rendering across desktop, tablet, and mobile displays.
+* **Glassmorphism Nav**: Floating frosted glass header with translucent background blur.
+* **Interactive Micro-Animations**: Smooth hover transitions, active search focus glow, and animated modal transitions powered by `framer-motion`.
 
 ---
 
