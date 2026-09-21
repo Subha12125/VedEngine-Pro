@@ -6,7 +6,9 @@
   "author": "Subho",
   "type": "commonjs",
   "main": "index.js",
+  "packageManager": "pnpm@9.12.0",
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "test": "echo \"Error: no test specified\" && exit 1"
   }
 }
